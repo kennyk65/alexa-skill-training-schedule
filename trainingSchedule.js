@@ -1,5 +1,8 @@
 'use strict';
 
+var AWS = require('aws-sdk');
+var s3 = new AWS.S3({apiVersion: '2006-03-01'});
+
 /**
  * This sample demonstrates a simple skill built with the Amazon Alexa Skills Kit.
  * The Intent Schema, Custom Slots, and Sample Utterances for this skill, as well as
@@ -41,6 +44,37 @@ function buildResponse(sessionAttributes, speechletResponse) {
     };
 }
 
+//  Return a JSON structure containing info on the given Event ID.
+//  This is done by an S3 Select on a CSV file in the training-schedule bucket.
+//  Return value is JSON.
+//  TODO: PROBLEM - AWS LAMBDA USES VERSION 2.249.1 OF THE JAVASCRIPT SDK.  THIS DOESN'T APPEAR TO HAVE THE 
+//  S3.SELECTOBJECTCONTENT METHOD.  CURRENT VERSION IS 2.268.1.  Looks like I need 2.256.1 or better.
+function getEventInfo(eventId) {
+    var params = {
+        Bucket: 'training-schedule',
+        Key: 'ready/current-schedule.csv',
+        Expression: 'select * from s3object s where "Event ID" = \'' + eventId + '\'',
+        ExpressionType: "SQL", 
+        InputSerialization: { CSV: {} },
+        OutputSerialization: { JSON: {} }
+      };
+      s3.selectObjectContent(params, function(err, data) {
+        if (err) console.log(err, err.stack); // an error occurred
+        else {
+            console.log(data);           // successful response
+            var eventStream = data.Payload;
+
+            eventStream.on('data', function(event) {
+              // Check the top-level field to determine which event this is.
+              if (event.Records) {
+                // handle Records event
+                console.log('this is the payload: ' + event.Records.Payload);
+              }
+            });
+          
+        }    
+      });
+}
 
 // --------------- Functions that control the skill's behavior -----------------------
 
@@ -52,7 +86,7 @@ function getWelcomeResponse(callback) {
         'You can ask me things like "what is event id", and then give me a number. ';
     // If the user either does not reply to the welcome message or says something that is not
     // understood, they will be prompted again with this text.
-    const repromptText = 'Please tell me the event number you are interested in.';
+    const repromptText = 'Please tell me the event id you are interested in.';
     const shouldEndSession = false;
 
     callback(sessionAttributes,
@@ -88,6 +122,7 @@ function getEventId(intent, session, callback) {
     if (eventIdSlot) {
         const eventId = eventIdSlot.value;
         speechOutput = `The event ID you asked for is ${eventId}.`;
+        getEventInfo(eventId);
     } else {
         speechOutput = "I'm not sure what event ID you asked for. Please try again.";
     }
