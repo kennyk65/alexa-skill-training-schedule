@@ -1,0 +1,83 @@
+{
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "training schedule",
+            "intents": [
+                {
+                    "name": "AMAZON.FallbackIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": []
+                },
+                {
+                    "name": "getEventId",
+                    "slots": [
+                        {
+                            "name": "eventId",
+                            "type": "AMAZON.NUMBER"
+                        }
+                    ],
+                    "samples": [
+                        "what is reggie id {eventId}",
+                        "what is reggie number {eventId}",
+                        "what is reggie {eventId}",
+                        "what is event {eventId}",                        
+                        "what is event id {eventId}",
+                        "what is event number {eventId}",
+                        "get event {eventId}",
+                        "get event id {eventId}",
+                        "get event number {eventId}",
+                        "tell me about event {eventId}",
+                        "tell me about event id {eventId}",
+                        "tell me about event number {eventId}",
+                        "event {eventId}",                        
+                        "event id {eventId}",
+                        "event number {eventId}"
+                    ]
+                }
+            ],
+            "types": []
+        },
+        "dialog": {
+            "intents": [
+                {
+                    "name": "getEventId",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "eventId",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.623662974889.527656873677"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        "prompts": [
+            {
+                "id": "Elicit.Slot.623662974889.527656873677",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What is the event ID?"
+                    }
+                ]
+            }
+        ]
+    }
+}
