@@ -1,24 +1,23 @@
 Name:  training schedule
 
 Minimum Viable Product:
-Alexa, what is event ###
+Alexa, what is event ###, and Alexa responds with "your event id is ###" - DONE.
 
-Alexa responds with:  Given an event ID, If line does not say stat or vac,  say "<course title> at <delivery location> delivered by <instructors> starts on <start date> at <start time>.  It ends on <end date> and has <students ops> enrolled students."
+Next goal:
+Have code S3 select the training-schedule/ready/current-schedule.csv with given event ID.
+If line does not say stat or vac,  Have Alexa say "<course title> at <delivery location> delivered by <instructors> starts on <start date> at <start time>.  It ends on <end date> and has <students ops> enrolled students."
+If line says stat have Alexa say "this is a holiday on <start date>"
+If line says vac have Alexa say "this is a vacation event for <Instructors>, from <start date> through <end date>"
 
 ======================
 Design:
 Take spreadsheet, upload to bucket.
-Have First Lambda function copy to another bucket / prefix with well understood name.
+Have First Lambda function copy to another bucket / prefix with well understood name. - STILL WORKING, STUCK ON COPY
 Have second Lambda function use S3 select queries on CSV file.
-select * from s3object s where "Event ID" = '102700'
+select * from s3object s where "Event ID" = '102700'   -  NOT SUPPORTED IN CURRENT SDK VERSION RUN IN LAMBDA.
 
 ==========
-Plan:
-First function - just take “what is event number xxx” and write to log, parrot it back. - DONE
-Second iteration:  Use hard-coded csv file for now.
-Develop node app that can take eventid query S3, and dump to log.
-
-
+Capabilities to Develop:
 
 what is on my schedule this week / next week / two weeks from now / the week of
 what was on my schedule last week
@@ -27,11 +26,12 @@ what is my next class
 
 Where do i need to go this week / next week / …..
 
-Where is ____ this week / next week ….
+Where is <instructor> this week / next week ….
+What is <instructor> teaching this week / next week...
 
-What time zone is _____ in this week
+What time zone is <instructor> in this week
 
-What is scheduled in XXXX this week / next week
+What is scheduled in <delivery location> this week / next week
 
 What is event #
 
