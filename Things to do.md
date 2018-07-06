@@ -12,7 +12,7 @@ DONE!
 
 ======================
 Design:
-Take spreadsheet, upload to bucket.
+Take spreadsheet, upload to bucket.  - DONE, but not fully automated.
 Have First Lambda function copy to another bucket / prefix with well understood name. - DONE, USING PYTHON
 Have second Lambda function use S3 select queries on CSV file.
 select * from s3object s where "Event ID" = '102700'   -  DONE, USING PYTHON

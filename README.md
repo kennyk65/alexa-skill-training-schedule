@@ -1,9 +1,15 @@
 # alexa-skill-training-schedule
 Artifacts for my Alexa skill - Training operations / scheduling assistant
 
-The interaction-model.json is the model that explains how Alexa determines 'intents' based on voice prompts.  You use this file in the Alexa Developer console:  https://developer.amazon.com/alexa-skills-kit .  One key bit is how it identifies the ARN of the backing lambda function.
+The interaction-model.json - the model that explains how Alexa determines 'intents' based on voice prompts.  You use this file in the Alexa Developer console:  https://developer.amazon.com/alexa-skills-kit .  One key bit is how it identifies the ARN of the backing lambda function.  FWiW I've found it is easier to modify this through the website, then just save the resulting JSON here for safe-keeping.
 
-trainingSchedule.js is the backing Lambda function, still under development.  At present, I'm having the code do an S3 Select query against a CSV in an S3 bucket, unfortunately the version of the SDK supported by Lambda does not support this new feature, see comments for details.
+trainingScheduleP.py -  The backing Lambda Python function, still under development.  At present it supports a few 'intents' that I've implemented.  It uses the new S3 Select query against a CSV in an S3 bucket.
+
+trainingScheduleProcessUploadP.py - This function takes the 'SCHEDULE*.csv' file that you upload to the 'training-schedule' S3 bucket, and moves it to a 'ready' folder under a common name, replacing whatever was already there.  This provides a nice, stable S3 object that the other function can query off of.
+
+trainingSchedule.js - This was my first attempt, in NodeJS.  Unfortunately the version of the SDK supported by Lambda does not support the S3 select feature, and I didn't want to go through a packaging step every time I changed a line of code, so I put this on hold.  See comments for details.
+
+trainingScheduleProcessUpload.js - This was my first attempt to do what the *.py file above does.  Ran into an obstacle where the S3.copyObject function wouldn't work in JS.  Opened a support ticket, and switched to Python, which worked just fine.
 
 Things to do.md is just my running scratchpad of things I want to make this thing do.
 
