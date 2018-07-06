@@ -16,3 +16,5 @@ Things to do.md is just my running scratchpad of things I want to make this thin
 Two-way handshake:  The 'skill' needs to know about the ARN of the Lambda function as its 'endpoint' so it knows where to send the back-end calls.  The Lambda function does not need to know the ID of the skill, but it is more secure if it does.  It is identified in the trigger for the function and once again in the code just for safety.
 
 Publishing:  I used Alexa for business on my account.  You go into your AWS account / Alexa for Business and obtain your ARN - which is basically your account number with trimmings.  Then in the publishing section of the Alexa skills kit you put that number in.  Then back on the AWS side you approve it, and it is all hooked up.
+
+To use this skill, the AWS account (my account) must send an email invitation.  One only needs an Amazon retail account to use the skill; technically one does not even need an Echo device since you can use an app.  The email contains a link with a token in it; it takes one to their Amazon account and syncs everything up.
