@@ -7,6 +7,7 @@ The Intent Schema and other artifacts can be found at https://github.com/kennyk6
 from __future__ import print_function
 import boto3
 import json
+import datetime
 
 
 
@@ -155,9 +156,6 @@ def get_event_details(event_id):
             print(records)
             trainingEvent = json.loads(records)
             return describe_event_details(trainingEvent)
-            print("I think this is id: " + trainingEvent['Event ID'])
-            print("I think this is the course title: " + trainingEvent['Course Title'])
-            returnValue = trainingEvent['Course Title']
 
     return returnValue
 
@@ -203,19 +201,75 @@ def describe_event_details(trainingEvent):
         " starts on " + trainingEvent["Start Date"] + \
         " at " + trainingEvent["Start Time"] + " " + trainingEvent["Timezone"] + \
         " .  It ends on " + trainingEvent["End Date"] + \
-        " and has " + trainingEvent["Students (OPS)"] + " enrolled students."
+        " and has " + trainingEvent["Students (OPS)"] + " enrolled students.  "
+
+
+def describe_multiple_event_details(trainingEvents):
+    description = ""
+    for record in trainingEvents["records"]:
+        description = description + describe_event_details(record)
+    return description    
+
         
+def whatIsOnTheScheduleFor(intent,session):
+    card_title = intent['name']
+    should_end_session = False
+    
+    instructor = intent['slots']['instructor']['value']
+    speech_output = "Next on the schedule for " + instructor + ", " + get_upcoming_schedule(instructor)
+    reprompt_text = ""
+    session_attributes = {}
+    return build_response(session_attributes, build_speechlet_response(
+        card_title, speech_output, reprompt_text, should_end_session))
         
 
-    # The intent we got from Alexa don't make no sense:
-    def handle_bad_intent(intent):
-        card_title = "Unknown Intent"
-        should_end_session = False
+# This function queries our S3 CSV file for upcoming events for a particular instructor.
+# It returns a verbal description of the events discovered.
+def get_upcoming_schedule(instructor):
+    returnValue = 'No upcoming events found, check the instructor name: ' + instructor
+    today = getToday()
     
-        speech_output = "Sorry, I couldn't determine your intent.  I understood '" + intent['name'] + "' as the intent."
-        reprompt_text = ""
-        return build_response(session_attributes, build_speechlet_response(
-            card_title, speech_output, reprompt_text, should_end_session))
+    s3 = boto3.client('s3')
+    r = s3.select_object_content(
+        Bucket='training-schedule',
+        Key='ready/current-schedule.csv',
+        Expression='select * from s3object s where "Instructors" like \'%' + instructor + '%\'  and "Start Date" > \'' + today + '\' and "MVP" = \'Host\'',
+        ExpressionType="SQL", 
+        InputSerialization={'CSV': {"FileHeaderInfo": "Use"}},
+        OutputSerialization={'JSON': {"RecordDelimiter": ","}}  # Expecting multiple JSONs
+    )
+
+    # The returned result is described here: https://boto3.readthedocs.io/en/latest/reference/services/s3.html#S3.Client.select_object_content
+    # Basically, inside Payload.Records.Payload we find a string array containing JSON.
+    # Convert it to a Python object and we are in business!
+    # TODO: ORDER BY IS NOT SUPPORTED IN THE S3 SELECT, SO I THINK THE ORDER COMES FROM THE ORIGINAL SPREADSHEET!
+    for event in r['Payload']:
+        if 'Records' in event:
+            records = event['Records']['Payload'].decode('utf-8')
+            
+            records = "{\"records\": [" + records[0:len(records)-1] + "]}"
+            print(records)
+            trainingEvents = json.loads(records)
+            return describe_multiple_event_details(trainingEvents)
+
+    return returnValue
+
+# Returns today's date in a format that works well with the CSV file we have, YYYY-MM-DD.
+def getToday():
+    now = datetime.datetime.now()
+    return now.strftime("%Y-%m-%d")
+    
+    
+
+# The intent we got from Alexa don't make no sense:
+def handle_bad_intent(intent):
+    card_title = "Unknown Intent"
+    should_end_session = False
+
+    speech_output = "Sorry, I couldn't determine your intent.  I understood '" + intent['name'] + "' as the intent."
+    reprompt_text = ""
+    return build_response(session_attributes, build_speechlet_response(
+        card_title, speech_output, reprompt_text, should_end_session))
 
 
 # --------------- Events ------------------
@@ -248,6 +302,8 @@ def on_intent(intent_request, session):
     # Dispatch to your skill's intent handlers
     if intent_name == "getEventId":
         return get_event(intent, session)
+    if intent_name == "whatIsOnTheScheduleFor":
+        return whatIsOnTheScheduleFor(intent, session)
     if intent_name == "MyNameIsIntent":
         return set_color_in_session(intent, session)
     elif intent_name == "WhatsMyName":

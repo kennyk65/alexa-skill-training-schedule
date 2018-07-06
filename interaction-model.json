@@ -31,7 +31,7 @@
                         "what is reggie ID {eventId}",
                         "what is reggie number {eventId}",
                         "what is reggie {eventId}",
-                        "what is event {eventId}",                        
+                        "what is event {eventId}",
                         "what is event ID {eventId}",
                         "what is event number {eventId}",
                         "get event {eventId}",
@@ -40,9 +40,29 @@
                         "tell me about event {eventId}",
                         "tell me about event id {eventId}",
                         "tell me about event number {eventId}",
-                        "event {eventId}",                        
+                        "event {eventId}",
                         "event ID {eventId}",
                         "event number {eventId}"
+                    ]
+                },
+                {
+                    "name": "whatIsOnTheScheduleFor",
+                    "slots": [
+                        {
+                            "name": "instructor",
+                            "type": "AMAZON.Person"
+                        }
+                    ],
+                    "samples": [
+                        "what is the schedule for {instructor}",
+                        "what is on the schedule for {instructor}",
+                        "what is next on the schedule for {instructor}",
+                        "what is next for {instructor}",
+                        "what is on the upcoming schedule for {instructor}",
+                        "what is upcoming for {instructor}",
+                        "what is coming up for {instructor}",
+                        "what is coming up on the schedule for {instructor}",
+                        "what is next on {instructor} schedule"
                     ]
                 }
             ],
