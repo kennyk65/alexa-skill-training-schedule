@@ -28,20 +28,20 @@
                         }
                     ],
                     "samples": [
-                        "what is reggie id {eventId}",
+                        "what is reggie ID {eventId}",
                         "what is reggie number {eventId}",
                         "what is reggie {eventId}",
                         "what is event {eventId}",                        
-                        "what is event id {eventId}",
+                        "what is event ID {eventId}",
                         "what is event number {eventId}",
                         "get event {eventId}",
-                        "get event id {eventId}",
+                        "get event ID {eventId}",
                         "get event number {eventId}",
                         "tell me about event {eventId}",
                         "tell me about event id {eventId}",
                         "tell me about event number {eventId}",
                         "event {eventId}",                        
-                        "event id {eventId}",
+                        "event ID {eventId}",
                         "event number {eventId}"
                     ]
                 }

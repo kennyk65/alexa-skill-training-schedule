@@ -8,13 +8,14 @@ Have code S3 select the training-schedule/ready/current-schedule.csv with given 
 If line does not say stat or vac,  Have Alexa say "<course title> at <delivery location> delivered by <instructors> starts on <start date> at <start time>.  It ends on <end date> and has <students ops> enrolled students."
 If line says stat have Alexa say "this is a holiday on <start date>"
 If line says vac have Alexa say "this is a vacation event for <Instructors>, from <start date> through <end date>"
+DONE!
 
 ======================
 Design:
 Take spreadsheet, upload to bucket.
-Have First Lambda function copy to another bucket / prefix with well understood name. - STILL WORKING, STUCK ON COPY
+Have First Lambda function copy to another bucket / prefix with well understood name. - DONE, USING PYTHON
 Have second Lambda function use S3 select queries on CSV file.
-select * from s3object s where "Event ID" = '102700'   -  NOT SUPPORTED IN CURRENT SDK VERSION RUN IN LAMBDA.
+select * from s3object s where "Event ID" = '102700'   -  DONE, USING PYTHON
 
 ==========
 Capabilities to Develop:
