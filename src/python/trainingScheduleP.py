@@ -229,13 +229,13 @@ def describe_multiple_event_details(trainingEvents, omitInstructor, omitLocation
     return description    
 
         
-def what_is_on_the_schedule_for(intent,session,singleEventOnly):
+def what_is_on_the_schedule_for(intent,session,dateRange,singleEventOnly):
     card_title = intent['name']
     should_end_session = False
     
     instructor = intent['slots']['instructor']['value']
     print( "Instructor is: " + instructor)
-    speech_output = "Next on the schedule for " + instructor + ", " + get_upcoming_schedule(instructor,singleEventOnly)
+    speech_output = "Next on the schedule for " + instructor + ", " + get_upcoming_schedule(instructor,dateRange,singleEventOnly)
     reprompt_text = ""
     session_attributes = {}
     return build_response(session_attributes, build_speechlet_response(
@@ -244,10 +244,9 @@ def what_is_on_the_schedule_for(intent,session,singleEventOnly):
         
 # This function queries our S3 CSV file for upcoming events for a particular instructor.
 # It returns a verbal description of the events discovered.
-def get_upcoming_schedule(instructor,singleEventOnly):
+def get_upcoming_schedule(instructor,dateRange,singleEventOnly):
     returnValue = 'No upcoming events found, check the instructor name: ' + instructor
-    today = getToday()
-    sql = 'SELECT * FROM s3object s WHERE "Instructors" like \'%' + instructor + '%\'  and "Start Date" > \'' + today + '\' and "MVP" = \'Host\''
+    sql = 'SELECT * FROM s3object s WHERE "Instructors" like \'%' + instructor + '%\' and "Start Date" > \'' + dateRange['fromDate'] + '\' and "Start Date" < \'' + dateRange['toDate'] + '\' and "MVP" = \'Host\''
     if singleEventOnly:
         sql += ' LIMIT 1'
     print ( 'SQL to execute: ' + sql)
@@ -283,14 +282,23 @@ def getToday():
     now = datetime.datetime.now()
     return now.strftime("%Y-%m-%d")
     
-# TODO: IMPLEMENT    
-def get_next_week():
-    return;
-
-# TODO: IMPLEMENT    
-def get_two_weeks_from_now():
-    return;
     
+# The default date range for our searches is from today to whenever    
+def get_default_date_range():
+    fromDate = datetime.datetime.now()              # Today
+    toDate = fromDate + datetime.timedelta(60)      # The forseeable future
+    return { 'fromDate': fromDate.strftime("%Y-%m-%d"), 'toDate': toDate.strftime("%Y-%m-%d")}
+    
+    
+# Produce a Date range that describes 'next week'    
+def get_next_week():
+    now = datetime.datetime.now()                   # Today
+    delta = datetime.timedelta(6-now.weekday())     # Days until next Sunday.  On weekday(), Monday is 0 and Sunday is 6
+    fromDate = now + delta                          # Next Sunday
+    toDate = fromDate + datetime.timedelta(7)       # Sunday after next
+    return { 'fromDate': fromDate.strftime("%Y-%m-%d"), 'toDate': toDate.strftime("%Y-%m-%d")}
+
+
 # Instructor names have an irritating "(P)" in them which makes the description awkward.    
 def remove_the_p(input):
     return input.replace("(P)", "", 1);
@@ -344,13 +352,16 @@ def on_intent(intent_request, session):
     # instructorName = getInstructorFromRequest(userArn)
     # print("InstructorName: " + instructorName)
     
+    
     # Dispatch to your skill's intent handlers
     if intent_name == "getEventId":
         return get_event(intent, session)
-    if intent_name == "whatIsOnTheScheduleFor":
-        return what_is_on_the_schedule_for(intent, session, False)
-    if intent_name == "whatIsTheNextEventFor":
-        return what_is_on_the_schedule_for(intent, session, True)
+    if intent_name == "whatIsScheduledFor":
+        return what_is_on_the_schedule_for(intent, session, get_default_date_range(), False)
+    if intent_name == "whatIsNextFor":
+        return what_is_on_the_schedule_for(intent, session, get_default_date_range(), True)
+    if intent_name == "whatIsNextWeekFor":
+        return what_is_on_the_schedule_for(intent, session, get_next_week(), False) 
     if intent_name == "MyNameIsIntent":
         return set_color_in_session(intent, session)
     elif intent_name == "WhatsMyName":

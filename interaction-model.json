@@ -46,7 +46,7 @@
                     ]
                 },
                 {
-                    "name": "whatIsOnTheScheduleFor",
+                    "name": "whatIsScheduledFor",
                     "slots": [
                         {
                             "name": "instructor",
@@ -84,7 +84,7 @@
                     ]
                 },
                 {
-                    "name": "whatIsTheNextEventFor",
+                    "name": "whatIsNextFor",
                     "slots": [
                         {
                             "name": "instructor",
@@ -114,6 +114,58 @@
                         "what is the next class coming up for {instructor}",
                         "what is the next course coming up for {instructor}",
                         "what is the next thing coming up for {instructor}"
+                    ]
+                },
+                {
+                    "name": "whatIsNextWeekFor",
+                    "slots": [
+                        {
+                            "name": "instructor",
+                            "type": "AMAZON.Person"
+                        }
+                    ],
+                    "samples": [
+                        "what is the schedule for {instructor} next week",
+                        "what is on the schedule for {instructor} next week",
+                        "what is on the upcoming schedule for {instructor} next week",
+                        "what is upcoming for {instructor} next week",
+                        "what is coming up for {instructor} next week",
+                        "what is coming up on the schedule for {instructor} next week",
+                        "what are the events on the schedule for {instructor} next week",
+                        "what are the classes on the schedule for {instructor} next week",
+                        "what are the courses on the schedule for {instructor} next week",
+                        "what are the things on the schedule for {instructor} next week",
+                        "what events are coming up on the schedule for {instructor} next week",
+                        "what classes are coming up on the schedule for {instructor} next week",
+                        "what courses are coming up on the schedule for {instructor} next week",
+                        "what things are coming up on the schedule for {instructor} next week",
+                        "what events are on the schedule for {instructor} next week",
+                        "what classes are on the schedule for {instructor} next week",
+                        "what courses are on the schedule for {instructor} next week",
+                        "what things are on the schedule for {instructor} next week",
+                        "what are the events for {instructor} next week",
+                        "what are the classes for {instructor} next week",
+                        "what are the courses for {instructor} next week",
+                        "what are the things for {instructor} next week",
+                        "what events are for {instructor} next week",
+                        "what classes are for {instructor} next week",
+                        "what courses are for {instructor} next week",
+                        "what things are for {instructor} next week",
+                        "what is on next week's schedule for {instructor}",
+                        "what events are on next week's schedule for {instructor}",
+                        "what classes are on next week's schedule for {instructor}",
+                        "what courses are on next week's schedule for {instructor}",
+                        "what things are on next week's schedule for {instructor}",
+                        "what is coming up on next week's schedule for {instructor}",
+                        "what events are coming up on next week's schedule for {instructor}",
+                        "what classes are coming up on next week's schedule for {instructor}",
+                        "what courses are coming up on next week's schedule for {instructor}",
+                        "what things are coming up on next week's schedule for {instructor}",
+                        "what is coming up next week for {instructor}",
+                        "what events are coming up next week for {instructor}",
+                        "what classes are coming up next week for {instructor}",
+                        "what courses are coming up next week for {instructor}",
+                        "what things are coming up next week for {instructor}"
                     ]
                 }
             ],
