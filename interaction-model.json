@@ -56,8 +56,6 @@
                     "samples": [
                         "what is the schedule for {instructor}",
                         "what is on the schedule for {instructor}",
-                        "what is next on the schedule for {instructor}",
-                        "what is next for {instructor}",
                         "what is on the upcoming schedule for {instructor}",
                         "what is upcoming for {instructor}",
                         "what is coming up for {instructor}",
@@ -65,6 +63,57 @@
                         "what is next on {instructor} schedule",
                         "what are the next events on the schedule for {instructor}",
                         "what are the next classes on the schedule for {instructor}",
+                        "what are the next courses on the schedule for {instructor}",
+                        "what are the next things on the schedule for {instructor}",
+                        "what events are coming up on the schedule for {instructor}",
+                        "what classes are coming up on the schedule for {instructor}",
+                        "what courses are coming up on the schedule for {instructor}",
+                        "what things are coming up on the schedule for {instructor}",
+                        "what events are next on the schedule for {instructor}",
+                        "what classes are next on the schedule for {instructor}",
+                        "what courses are next on the schedule for {instructor}",
+                        "what things are next on the schedule for {instructor}",
+                        "what are the next events for {instructor}",
+                        "what are the next classes for {instructor}",
+                        "what are the next courses for {instructor}",
+                        "what are the next things for {instructor}",
+                        "what events are next for {instructor}",
+                        "what classes are next for {instructor}",
+                        "what courses are next for {instructor}",
+                        "what things are next for {instructor}"
+                    ]
+                },
+                {
+                    "name": "whatIsTheNextEventFor",
+                    "slots": [
+                        {
+                            "name": "instructor",
+                            "type": "AMAZON.Person"
+                        }
+                    ],
+                    "samples": [
+                        "what is next on the schedule for {instructor}",
+                        "what is next for {instructor}",
+                        "what is the next event for {instructor}",
+                        "what is the next class for {instructor}",
+                        "what is the next course for {instructor}",
+                        "what is the next thing for {instructor}",
+                        "what is coming up next for {instructor}",
+                        "what is coming up on the schedule for {instructor}",
+                        "what is coming up next on the schedule for {instructor}",
+                        "what is next on {instructor} schedule",
+                        "what is the next event on the schedule for {instructor}",
+                        "what is the next class on the schedule for {instructor}",
+                        "what is the next course on the schedule for {instructor}",
+                        "what is the next thing on the schedule for {instructor}",
+                        "what is the next event coming up on the schedule for {instructor}",
+                        "what is the next class coming up on the schedule for {instructor}",
+                        "what is the next course coming up on the schedule for {instructor}",
+                        "what is the next thing coming up on the schedule for {instructor}",
+                        "what is the next event coming up for {instructor}",
+                        "what is the next class coming up for {instructor}",
+                        "what is the next course coming up for {instructor}",
+                        "what is the next thing coming up for {instructor}"
                     ]
                 }
             ],

@@ -9,6 +9,8 @@ import boto3
 import json
 import datetime
 
+S3_BUCKET='training-schedule'
+S3_SCHEDULE_FILE='ready/current-schedule.csv'
 
 
 # --------------- Helpers that build all of the responses ----------------------
@@ -136,12 +138,15 @@ def get_event(intent, session):
 # It returns a verbal description of the event that was queried.
 def get_event_details(event_id):
     returnValue = 'Unknown event'
+    sql='select * from s3object s where "Event ID" = \'' + event_id + '\''
+    print ( 'SQL to execute: ' + sql)
+    # TODO: THIS SQL IGNORES THE STUDENT COUNT FROM OTHER EVENTS THAT BELONG TO THIS ONE.
     
     s3 = boto3.client('s3')
     r = s3.select_object_content(
-        Bucket='training-schedule',
-        Key='ready/current-schedule.csv',
-        Expression='select * from s3object s where "Event ID" = \'' + event_id + '\'',
+        Bucket=S3_BUCKET,
+        Key=S3_SCHEDULE_FILE,
+        Expression=sql,
         ExpressionType="SQL", 
         InputSerialization={'CSV': {"FileHeaderInfo": "Use"}},
         OutputSerialization={'JSON': {}}
@@ -155,7 +160,7 @@ def get_event_details(event_id):
             records = event['Records']['Payload'].decode('utf-8')
             print(records)
             trainingEvent = json.loads(records)
-            return describe_event_details(trainingEvent)
+            return describe_event_details(trainingEvent,False,False)
 
     return returnValue
 
@@ -182,7 +187,7 @@ def get_event_details(event_id):
 #   "Students (SF)":"0",
 #   "Max Students":"12",
 #   "Instructors":"Krueger (P)\r"}
-def describe_event_details(trainingEvent):
+def describe_event_details(trainingEvent, omitInstructor, omitLocation):
 
     eventType = trainingEvent["Event Type"]
     # If eventType is STAT have Alexa say "this is a holiday on <start date>"
@@ -195,45 +200,64 @@ def describe_event_details(trainingEvent):
              " from " + trainingEvent["Start Date"] + " through " + trainingEvent["End Date"]
     
     # Otherwise,  Have Alexa say describe the event:
-    return trainingEvent["Course Title"] + \
-        " at " + trainingEvent["Delivery Location"] + \
-        " delivered by " + trainingEvent["Instructors"] + \
+    description = trainingEvent["Course Title"] 
+
+    # Sometimes it isn't necessary to say what the location is, such as when asking for all events for a given location:    
+    if not omitLocation:
+        description += " at " + trainingEvent["Delivery Location"]
+        
+    # Sometimes it isn't necessary to say who the instructor is, such as when asking for all events for a given instructor:    
+    if not omitInstructor:
+        description += " delivered by " + remove_the_p(trainingEvent["Instructors"])
+            
+    description += \
         " starts on " + trainingEvent["Start Date"] + \
-        " at " + trainingEvent["Start Time"] + " " + trainingEvent["Timezone"] + \
-        " .  It ends on " + trainingEvent["End Date"] + \
-        " and has " + trainingEvent["Students (OPS)"] + " enrolled students.  "
+        " at " + trainingEvent["Start Time"] + " " + trainingEvent["Timezone"] + ".  It "
+        
+    # One day event?  Don't bother saying end date:    
+    if trainingEvent["Start Date"] != trainingEvent["End Date"]: 
+        description += "ends on " + trainingEvent["End Date"] + " and " 
+
+    description += "has " + trainingEvent["Students (OPS)"] + " enrolled students.  "
+    return description
 
 
-def describe_multiple_event_details(trainingEvents):
+def describe_multiple_event_details(trainingEvents, omitInstructor, omitLocation):
     description = ""
     for record in trainingEvents["records"]:
-        description = description + describe_event_details(record)
+        description = description + describe_event_details(record, omitInstructor, omitLocation)
     return description    
 
         
-def whatIsOnTheScheduleFor(intent,session):
+def what_is_on_the_schedule_for(intent,session,singleEventOnly):
     card_title = intent['name']
     should_end_session = False
     
     instructor = intent['slots']['instructor']['value']
-    speech_output = "Next on the schedule for " + instructor + ", " + get_upcoming_schedule(instructor)
+    print( "Instructor is: " + instructor)
+    speech_output = "Next on the schedule for " + instructor + ", " + get_upcoming_schedule(instructor,singleEventOnly)
     reprompt_text = ""
     session_attributes = {}
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
         
-
+        
 # This function queries our S3 CSV file for upcoming events for a particular instructor.
 # It returns a verbal description of the events discovered.
-def get_upcoming_schedule(instructor):
+def get_upcoming_schedule(instructor,singleEventOnly):
     returnValue = 'No upcoming events found, check the instructor name: ' + instructor
     today = getToday()
+    sql = 'SELECT * FROM s3object s WHERE "Instructors" like \'%' + instructor + '%\'  and "Start Date" > \'' + today + '\' and "MVP" = \'Host\''
+    if singleEventOnly:
+        sql += ' LIMIT 1'
+    print ( 'SQL to execute: ' + sql)
+    # TODO: THIS SQL IGNORES THE STUDENT COUNT FROM OTHER EVENTS THAT BELONG TO THIS ONE.
     
     s3 = boto3.client('s3')
     r = s3.select_object_content(
-        Bucket='training-schedule',
-        Key='ready/current-schedule.csv',
-        Expression='select * from s3object s where "Instructors" like \'%' + instructor + '%\'  and "Start Date" > \'' + today + '\' and "MVP" = \'Host\'',
+        Bucket=S3_BUCKET,
+        Key=S3_SCHEDULE_FILE,
+        Expression=sql,
         ExpressionType="SQL", 
         InputSerialization={'CSV': {"FileHeaderInfo": "Use"}},
         OutputSerialization={'JSON': {"RecordDelimiter": ","}}  # Expecting multiple JSONs
@@ -249,14 +273,27 @@ def get_upcoming_schedule(instructor):
             records = "{\"records\": [" + records[0:len(records)-1] + "]}"  # Fix the individual JSON objects into a single one that we can use.
             # print(records)
             trainingEvents = json.loads(records)
-            return describe_multiple_event_details(trainingEvents)
+            return describe_multiple_event_details(trainingEvents,True,False)
 
     return returnValue
+
 
 # Returns today's date in a format that works well with the CSV file we have, YYYY-MM-DD.
 def getToday():
     now = datetime.datetime.now()
     return now.strftime("%Y-%m-%d")
+    
+# TODO: IMPLEMENT    
+def get_next_week():
+    return;
+
+# TODO: IMPLEMENT    
+def get_two_weeks_from_now():
+    return;
+    
+# Instructor names have an irritating "(P)" in them which makes the description awkward.    
+def remove_the_p(input):
+    return input.replace("(P)", "", 1);
     
 # TODO: FIGURE OUT HOW TO OBTAIN USER'S NAME.
 # Obtain and return the instructor's last name based on the incoming user ARN    
@@ -301,9 +338,7 @@ def on_intent(intent_request, session):
     intent_name = intent_request['intent']['name']
     userArn = session['user']['userId']
 
-    print("on_intent requestId=" + intent_request['requestId'] +
-          ", sessionId=" + session['sessionId'] +
-          ", intent_name=" + intent_name)
+    print("on_intent name=" + intent_name + ", requestId=" + intent_request['requestId'])
 
 
     # instructorName = getInstructorFromRequest(userArn)
@@ -313,7 +348,9 @@ def on_intent(intent_request, session):
     if intent_name == "getEventId":
         return get_event(intent, session)
     if intent_name == "whatIsOnTheScheduleFor":
-        return whatIsOnTheScheduleFor(intent, session)
+        return what_is_on_the_schedule_for(intent, session, False)
+    if intent_name == "whatIsTheNextEventFor":
+        return what_is_on_the_schedule_for(intent, session, True)
     if intent_name == "MyNameIsIntent":
         return set_color_in_session(intent, session)
     elif intent_name == "WhatsMyName":
@@ -348,7 +385,7 @@ def lambda_handler(event, context):
     request = event['request']
     requestType = request['type']
     applicationId = session['application']['applicationId']
-    print("event.session.application.applicationId=" + applicationId )
+    #print("event.session.application.applicationId=" + applicationId )
 
     """
     Uncomment this if statement and populate with your skill's application ID to
