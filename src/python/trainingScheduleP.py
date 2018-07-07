@@ -246,9 +246,8 @@ def get_upcoming_schedule(instructor):
     for event in r['Payload']:
         if 'Records' in event:
             records = event['Records']['Payload'].decode('utf-8')
-            
-            records = "{\"records\": [" + records[0:len(records)-1] + "]}"
-            print(records)
+            records = "{\"records\": [" + records[0:len(records)-1] + "]}"  # Fix the individual JSON objects into a single one that we can use.
+            # print(records)
             trainingEvents = json.loads(records)
             return describe_multiple_event_details(trainingEvents)
 
@@ -259,7 +258,13 @@ def getToday():
     now = datetime.datetime.now()
     return now.strftime("%Y-%m-%d")
     
-    
+# TODO: FIGURE OUT HOW TO OBTAIN USER'S NAME.
+# Obtain and return the instructor's last name based on the incoming user ARN    
+def getInstructorFromRequest(userArn):   
+    client = boto3.client('alexaforbusiness')
+    response = client.get_contact(ContactArn=userArn)
+    return response['Contact']['LastName']
+
 
 # The intent we got from Alexa don't make no sense:
 def handle_bad_intent(intent):
@@ -294,11 +299,16 @@ def on_intent(intent_request, session):
 
     intent = intent_request['intent']
     intent_name = intent_request['intent']['name']
+    userArn = session['user']['userId']
 
     print("on_intent requestId=" + intent_request['requestId'] +
           ", sessionId=" + session['sessionId'] +
           ", intent_name=" + intent_name)
 
+
+    # instructorName = getInstructorFromRequest(userArn)
+    # print("InstructorName: " + instructorName)
+    
     # Dispatch to your skill's intent handlers
     if intent_name == "getEventId":
         return get_event(intent, session)
@@ -333,24 +343,26 @@ def lambda_handler(event, context):
     etc.) The JSON body of the request is provided in the event parameter.
     """
     # print(event)
-    print("event.session.application.applicationId=" +
-          event['session']['application']['applicationId'])
+    
+    session = event['session']
+    request = event['request']
+    requestType = request['type']
+    applicationId = session['application']['applicationId']
+    print("event.session.application.applicationId=" + applicationId )
 
     """
     Uncomment this if statement and populate with your skill's application ID to
     prevent someone else from configuring a skill that sends requests to this
     function.
     """
-    if (event['session']['application']['applicationId'] !=
-            "amzn1.ask.skill.cb877bae-48b6-4d10-9e9c-3d28f4c42c18"):
+    if (applicationId != "amzn1.ask.skill.cb877bae-48b6-4d10-9e9c-3d28f4c42c18"):
         raise ValueError("Invalid Application ID")
 
-    if event['session']['new']:
-        on_session_started({'requestId': event['request']['requestId']}, event['session'])
-
-    if event['request']['type'] == "LaunchRequest":
-        return on_launch(event['request'], event['session'])
-    elif event['request']['type'] == "IntentRequest":
-        return on_intent(event['request'], event['session'])
-    elif event['request']['type'] == "SessionEndedRequest":
-        return on_session_ended(event['request'], event['session'])
+    if session['new']:
+        on_session_started({'requestId': request['requestId']}, session)
+    if requestType == "LaunchRequest":
+        return on_launch(request, session)
+    elif requestType == "IntentRequest":
+        return on_intent(request, session)
+    elif requestType == "SessionEndedRequest":
+        return on_session_ended(request, session)

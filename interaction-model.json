@@ -62,7 +62,9 @@
                         "what is upcoming for {instructor}",
                         "what is coming up for {instructor}",
                         "what is coming up on the schedule for {instructor}",
-                        "what is next on {instructor} schedule"
+                        "what is next on {instructor} schedule",
+                        "what are the next events on the schedule for {instructor}",
+                        "what are the next classes on the schedule for {instructor}",
                     ]
                 }
             ],

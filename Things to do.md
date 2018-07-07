@@ -44,5 +44,3 @@ on my schedule this week:  determine current date, backup to sunday, find next s
 
 
 
-find <mvp> line that says ‘Host’, read it and
-
