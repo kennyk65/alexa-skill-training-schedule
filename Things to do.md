@@ -40,6 +40,9 @@ When is my next day off
 
 When does my next class / event start
 
+Where am I on the week of xxxx.
+Where am I on <date>
+
 on my schedule this week:  determine current date, backup to sunday, find next start date, if in current week say it, find next start date until end of week.  If nothing say there is nothing on your schedule this week.
 
 

@@ -111,7 +111,7 @@ def get_instructor_from_session(intent, session):
         speech_output = "I understand your name is " + instructor 
     else:
         speech_output = "I'm not sure what your name is on the schedule.  " \
-                        "You can set your name by saying, 'call me Durst' or 'my name is Cory'."
+                        "You can set your name by saying, 'call me Durst' or 'my name is Stapleton'."
 
     # Setting reprompt_text to None signifies that we do not want to reprompt
     # the user. If the user does not respond or says something that is not
@@ -246,7 +246,12 @@ def what_is_on_the_schedule_for(intent,session,dateRange,singleEventOnly):
 # It returns a verbal description of the events discovered.
 def get_upcoming_schedule(instructor,dateRange,singleEventOnly):
     returnValue = 'No upcoming events found, check the instructor name: ' + instructor
-    sql = 'SELECT * FROM s3object s WHERE "Instructors" like \'%' + instructor + '%\' and "Start Date" > \'' + dateRange['fromDate'] + '\' and "Start Date" < \'' + dateRange['toDate'] + '\' and "MVP" = \'Host\''
+    
+    # The instructor field has lots of extra chars and stuff, that's why it is a 'like'.  
+    # The date range allows for 'next week' style queries.
+    # 'Host'' or '' - there are multiple lines for each event, the line that says host is the main one.  
+    # On-site courses don't have anything in the MVP field.
+    sql = 'SELECT * FROM s3object s WHERE "Instructors" like \'%' + instructor + '%\' and "Start Date" > \'' + dateRange['fromDate'] + '\' and "Start Date" < \'' + dateRange['toDate'] + '\' and "MVP" in ( \'Host\', \'\' )
     if singleEventOnly:
         sql += ' LIMIT 1'
     print ( 'SQL to execute: ' + sql)
@@ -318,6 +323,7 @@ def handle_bad_intent(intent):
 
     speech_output = "Sorry, I couldn't determine your intent.  I understood '" + intent['name'] + "' as the intent."
     reprompt_text = ""
+    session_attributes = {}
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 

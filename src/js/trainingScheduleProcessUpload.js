@@ -8,9 +8,10 @@ const s3 = new aws.S3();
 /*
 Triggered by:  Object Create in 'training-schedule' bucket.
 Take incoming file, rename it to training-schedule/ready/current-schedule.csv.
-TODO:  At present the copyObject function is not working.  No error, just not working.  Opened issue with support
+TODO:  I had problems with the async / await concepts, so the code wasn't working at first.  So I switched to Python.
+The code as it is here actually works fine now that I've fixed it.
 */
-exports.handler = async (event, context) => {
+exports.handler =  (event, context) => {
     console.log('Received event:', JSON.stringify(event, null, 2));
 
     // Determine the bucket / key of the newly uploaded object:
